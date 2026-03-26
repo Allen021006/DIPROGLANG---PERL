@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perlfect Library — OPAC System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+  :root{
+    --bg:#0a0c0f;--bg2:#111418;--bg3:#181d23;--bg4:#1f262f;
+    --border:#2a3340;--border2:#3a4858;
+    --amber:#f0a500;--amber2:#ffc233;--teal:#1fc8a0;
+    --red:#f05050;--blue:#4da8f0;--green:#52c77a;
+    --text:#e8edf2;--text2:#8fa3b5;--text3:#4d6070;
+    --mono:'DM Mono',monospace;--sans:'Syne',sans-serif;
+    --radius:8px;--radius2:12px;
+  }
+  *{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  ::-webkit-scrollbar{
+    width:6px;
+    height:6px;
+  }
+  ::-webkit-scrollbar-track{
+    background:var(--bg);
+  }
+  ::-webkit-scrollbar-thumb
+  {background:var(--border2);
+    border-radius:3px;
+  }
+  button{
+    cursor:pointer;
+    font-family:var(--sans);
+    border:none;
+  }
+  input,select,textarea{
+    font-family:var(--mono);
+    background:var(--bg3);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:var(--radius);
+    padding:9px 12px;
+    font-size:13px;
+    outline:none;
+    transition:border .15s;
+  }
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--amber);
+  }
+  select option{
+    background:var(--bg3);
+  }
+  #app{
+    display:flex;
+    min-height:100vh;
+  }
+  #sidebar{
+    width:220px;
+    min-width:220px;
+    background:var(--bg2);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .logo{
+    padding:24px 20px 16px;
+    border-bottom:1px solid var(--border);}
+  .logo-ascii{
+    font-family:var(--mono);
+    font-size:7px;
+    line-height:1.15;
+    color:var(--amber);
+    white-space:pre;
+    letter-spacing:0;
+  }
+  .logo-sub{
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--text3);
+    margin-top:8px;
+  }
+  .nav{
+    padding:12px 0;
+    flex:1;
+  }
+  .nav-group{
+    padding:6px 0;
+  }
+  .nav-label{
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--text3);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:8px 20px 4px;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 20px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text2);
+    cursor:pointer;
+    transition:all .12s;
+    border:none;
+    background:none;
+    width:100%;
+    text-align:left;
+  }
+  .nav-item:hover{
+    color:var(--text);
+    background:var(--bg3);
+  }
+  .nav-item.active{
+    color:var(--amber);
+    background:var(--bg3);
+    border-left:2px solid var(--amber);
+  }
+  .nav-item .icon{
+    font-size:14px;
+    width:16px;
+    text-align:center;
+    flex-shrink:0;
+  }
+  .nav-badge{
+    margin-left:auto;
+    background:var(--red);
+    color:#fff;
+    font-size:9px;
+    font-family:var(--mono);
+    padding:2px 6px;
+    border-radius:10px;
+  }
+  #main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .topbar{
+    padding:16px 28px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:var(--bg2);
+  }
+  .topbar-title{
+    font-size:17px;
+    font-weight:700;
+    letter-spacing:-.02em;
+  }
+  .topbar-sub{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text3);
+  }
+  .topbar-right{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .content{
+    padding:28px;
+    flex:1;
+    overflow-y:auto;
+  }
+  .card{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:var(--radius2);
+    padding:20px 24px;
+    margin-bottom:20px;
+  }
+  .card-title{
+    font-size:14px;
+    font-weight:700;
+    color:var(--amber);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .stat-card{
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    text-align:center;
+  }
+  .stat-num{
+    font-family:var(--mono);
+    font-size:28px;
+    font-weight:500;
+    color:var(--amber);
+  }
+  .stat-lbl{
+    font-size:11px;
+    color:var(--text3);
+    margin-top:4px;font-family:var(--mono);}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 16px;
+    border-radius:var(--radius);
+    font-size:13px;
+    font-weight:600;
+    transition:all .12s;
+    font-family:var(--sans);
+  }
+  .btn-primary{
+    background:var(--amber);
+    color:#0a0c0f;
+  }
+  .btn-primary:hover{
+    background:var(--amber2);
+  }
+  .btn-secondary{
+    background:var(--bg3);
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn-secondary:hover{
+    border-color:var(--border2);
+    background:var(--bg4);
+  }
+  .btn-danger{
+    background:#2a1010;
+    color:var(--red);
+    border:1px solid #4a1a1a;
+  }
+  .btn-danger:hover{
+    background:#3a1515;
+  }
+  .btn-success{
+    background:#0d2a1a;
+    color:var(--green);
+    border:1px solid #1a4428;
+  }
+  .btn-success:hover{
+    background:#122e1f;
+  }
+  .btn-sm{
+    padding:5px 12px;
+    font-size:12px;
+  }
+  .tbl-wrap{
+    overflow-x:auto;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  thead tr{
+    background:var(--bg3);
+  }
+  th{
+    padding:10px 14px;
+    text-align:left;
+    font-family:var(--mono);
+    font-size:10px;color:var(--text3);
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--border);
+    color:var(--text2);
+  }
+  tr:last-child td{
+    border-bottom:none;
+  }
+  tr:hover td{
+    background:var(--bg3);
+  }
+  .td-id{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text3);
+  }
+  .td-title{
+    color:var(--text);
+    font-weight:600;
+  }
+  .td-ddc{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--teal);
+  }
+  .td-year{
+    font-family:var(--mono);
+    font-size:12px;
+  }
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:10px;
+    font-size:10px;
+    font-family:var(--mono);
+    font-weight:500;
+  }
+  .badge-available{
+    background:#0a2018;
+    color:var(--green);
+    border:1px solid #1a4030;
+  }
+  .badge-borrowed{
+    background:#2a1010;
+    color:var(--red);
+    border:1px solid #4a1a1a;
+  }
+  .badge-overdue{
+    background:#2a1a00;
+    color:var(--amber);
+    border:1px solid #4a3000;
+  }
+  .badge-returned{
+    background:#0d1a2a;
+    color:var(--blue);
+    border:1px solid #1a3050;
+  }
+  .badge-active{
+    background:#1a2a0a;
+    color:var(--green);
+    border:1px solid #2a4010;}
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .form-row.full{
+    grid-template-columns:1fr;
+  }
+  .form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .form-label{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text3);
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+  .form-input{
+    width:100%;
+  }
+  .form-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+  }
+  .form-hint{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--text3);
+    margin-top:4px;
+  }
+  .search-bar{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    align-items:center;
+  }
+  .filter-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    padding:5px 14px;
+    border-radius:16px;
+    font-size:12px;
+    font-family:var(--mono);
+    background:var(--bg3);
+    color:var(--text2);
+    border:1px solid var(--border);
+    cursor:pointer;
+    transition:all .12s;
+  }
+  .filter-btn.active{
+    background:var(--amber);
+    color:#0a0c0f;
+    border-color:var(--amber);
+  }
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .modal{
+    background:var(--bg2);
+    border:1px solid var(--border2);
+    border-radius:var(--radius2);
+    padding:28px;
+    width:100%;
+    max-width:560px;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  .modal-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--amber);
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .modal-close{
+    background:none;
+    border:none;
+    color:var(--text3);
+    font-size:18px;
+    cursor:pointer;
+    padding:2px 6px;
+  }
+  .modal-close:hover{
+    color:var(--text);
+  }
+  .ddc-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+  }
+  .ddc-card{
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .ddc-card:hover{
+    border-color:var(--amber);
+    background:var(--bg4);
+  }
+  .ddc-code{
+    font-family:var(--mono);
+    font-size:22px;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .ddc-name{font-size:12px;color:var(--text2);line-height:1.4;}
+  .ddc-sub-row{
+    display:flex;
+    gap:12px;
+    padding:7px 0;
+    border-bottom:1px solid var(--border);
+    font-size:12px;
+  }
+  .ddc-sub-code{
+    font-family:var(--mono);
+    color:var(--teal);
+    min-width:38px;
+  }
+  .ddc-sub-name{
+    color:var(--text2);
+  }
+  .toast{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    background:var(--bg2);
+    border:1px solid var(--border2);
+    border-radius:var(--radius);
+    padding:12px 18px;
+    font-size:13px;
+    z-index:2000;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 4px 24px rgba(0,0,0,.5);
+    animation:slideIn .2s ease;
+  }
+  .toast.success{
+    border-left:3px solid var(--green);
+    color:var(--green);
+  }
+  .toast.error{
+    border-left:3px solid var(--red);
+    color:var(--red);
+  }
+  .toast.info{
+    border-left:3px solid var(--amber);
+    color:var(--amber);
+  }
+
+  @keyframes slideIn{
+    from{
+      transform:translateX(40px);
+      opacity:0;}
+    to{
+      transform:translateX(0);
+      opacity:1;
+      }
+  }
+    
+  tr.overdue-row td{
+    background:#1a0d00 !important;
+  }
+  .empty{
+    text-align:center;
+    padding:48px 20px;
+    color:var(--text3);
+    font-family:var(--mono);
+    font-size:13px;
+  }
+  .fee-box{
+    background:#1a0d00;
+    border:1px solid #4a3000;
+    border-radius:var(--radius);
+    padding:12px 16px;
+    margin-top:12px;
+  }
+  .fee-amount{
+    font-family:var(--mono);
+    font-size:20px;
+    color:var(--amber);
+    font-weight:500;
+  }
+  .stats-bar{
+    height:8px;
+    background:var(--bg4);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .stats-fill{
+    height:100%;
+    border-radius:4px;
+    background:var(--teal);
+    transition:width .4s ease;
+  }
+  .confirm-box{
+    background:#1a0a0a;
+    border:1px solid var(--red);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .loading{
+    text-align:center;
+    padding:40px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text3);
+  }
+  .spinner{
+    display:inline-block;
+    width:16px;
+    height:16px;
+    border:2px solid var(--border2);
+    border-top-color:var(--amber);
+    border-radius:50%;
+    animation:spin .6s linear infinite;
+    margin-right:8px;
+    vertical-align:middle;
+  }
+
+  @keyframes spin{
+    to{
+      transform:rotate(360deg)
+    }
+  }
+
+  @media(max-width:768px){
+    #sidebar{
+      width:64px;
+      min-width:64px;
+    }
+    .nav-item span{
+      display:none;
+    }
+    .nav-label{
+      display:none;
+    }
+    .logo-ascii,.logo-sub{
+      display:none;
+    }
+    .logo{
+      padding:16px 8px;
+    }
+    .form-row{
+      grid-template-columns:1fr;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <nav id="sidebar">
+      <div class="logo">
+        <div class="logo-ascii">
+           ___  ____   _    ____ 
+          / _ \|  _ \ / \  / ___|
+         | | | | |_) / _ \| |    
+         | |_| |  __/ ___ \ |___ 
+          \___/|_| /_/   \_\____|
+        </div>
+        <div class="logo-sub">OPAC SYSTEM v1.0</div>
+      </div>
+      <div class="nav">
+        <div class="nav-label">Catalog</div>
+        <div class="nav-group">
+          <button class="nav-item active" onclick="showView('dashboard')"><span class="icon">⬡</span><span>Dashboard</span></button>
+          <button class="nav-item" onclick="showView('books')"><span class="icon">▦</span><span>All Books</span></button>
+          <button class="nav-item" onclick="showView('search')"><span class="icon">◎</span><span>Search</span></button>
+          <button class="nav-item" onclick="showView('add-book')"><span class="icon">+</span><span>Add Book</span></button>
+        </div>
+        <div class="nav-label">Circulation</div>
+        <div class="nav-group">
+          <button class="nav-item" onclick="showView('borrow')"><span class="icon">↗</span><span>Borrow</span></button>
+          <button class="nav-item" onclick="showView('return')"><span class="icon">↩</span><span>Return</span></button>
+          <button class="nav-item" id="nav-records" onclick="showView('records')"><span class="icon">☰</span><span>Records</span></button>
+        </div>
+        <div class="nav-label">Reference</div>
+        <div class="nav-group">
+          <button class="nav-item" onclick="showView('ddc')"><span class="icon">⊞</span><span>DDC Browser</span></button>
+          <button class="nav-item" onclick="showView('stats')"><span class="icon">◈</span><span>Statistics</span></button>
+        </div>
+      </div>
+    </nav>
+
+  <main id="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-sub">PERLFECT LIBRARY — OPAC SYSTEM</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="showView('add-book')">+ Add Book</button>
+      </div>
+    </div>
+    <div class="content" id="content">
+      <div class="loading"><span class="spinner"></span>Connecting to database...</div>
+    </div>
+  </main>
+
+  </div>
+<div id="modal-container"></div>
+<div id="toast-container"></div>
+
+<script>
+// API — all calls go through here
+const API = 'api.php';
+
+async function api(action, data = null, method = 'GET') {
+  try {
+    let url = API + '?action=' + action;
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (method === 'GET' && data) {
+      url += '&' + new URLSearchParams(data).toString();
+    } else if (method !== 'GET' && data) {
+      opts.body = JSON.stringify(data);
+    }
+    const res = await fetch(url, opts);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Server error');
+    return json;
+  } catch (e) {
+    showToast(e.message, 'error');
+    throw e;
+  }
+}
+
+// DDC Knowledge Base (client-side — no DB needed)
+const DDC = {
+  '000':{
+    name:'Computer Science, Information & General Works',
+    color:'#1fc8a0',
+    subs:{
+      '001':'Knowledge & Learning',
+      '002':'The Book',
+      '003':'Systems',
+      '004':'Computer Science',
+      '005':'Computer Programming',
+      '006':'Special Computer Methods',
+      '020':'Library & Information Science',
+      '070':'Journalism & Publishing'
+    }
+  },
+  '100':{
+    name:'Philosophy & Psychology',
+    color:'#4da8f0',
+    subs:{
+      '110':'Metaphysics',
+      '120':'Epistemology',
+      '130':'Parapsychology',
+      '150':'Psychology',
+      '160':'Logic',
+      '170':'Ethics',
+      '180':'Ancient Philosophy',
+      '190':'Modern Western Philosophy'
+    }
+  },
+  '200':{
+    name:'Religion',
+    color:'#f0a500',
+    subs:{
+      '210':'Philosophy of Religion',
+      '220':'The Bible',
+      '230':'Christianity',
+      '260':'Christian Organization',
+      '270':'Church History',
+      '290':'Other Religions'
+    }
+  },
+  '300':{
+    name:'Social Sciences',
+    color:'#52c77a',
+    subs:{
+      '310':'Statistics',
+      '320':'Political Science',
+      '330':'Economics',
+      '340':'Law',
+      '360':'Social Problems',
+      '370':'Education',
+      '380':'Commerce',
+      '390':'Customs & Folklore'
+    }
+  },
+  '400':{
+    name:'Language',
+    color:'#4da8f0',
+    subs:{
+      '410':'Linguistics',
+      '420':'English',
+      '430':'German',
+      '440':'French',
+      '460':'Spanish',
+      '470':'Latin',
+      '490':'Other Languages'
+    }
+  },
+  '500':{
+    name:'Natural Sciences & Mathematics',
+    color:'#f05050',
+    subs:{
+      '510':'Mathematics',
+      '520':'Astronomy',
+      '530':'Physics',
+      '540':'Chemistry',
+      '550':'Earth Sciences',
+      '570':'Biology',
+      '580':'Plants',
+      '590':'Animals'
+    }
+  },
+  '600':{
+    name:'Technology & Applied Sciences',
+    color:'#f0a500',
+    subs:{
+      '610':'Medicine & Health',
+      '620':'Engineering',
+      '630':'Agriculture',
+      '640':'Home Economics',
+      '650':'Management',
+      '660':'Chemical Engineering',
+      '690':'Construction'
+    }
+  },
+  '700':{
+    name:'The Arts & Recreation',
+    color:'#c47af0',
+    subs:{
+      '710':'Civic Art',
+      '720':'Architecture',
+      '730':'Sculpture',
+      '750':'Painting',
+      '770':'Photography',
+      '780':'Music',
+      '790':'Sports & Recreation'
+    }
+  },
+  '800':{
+    name:'Literature',
+    color:'#4da8f0',
+    subs:{
+      '810':'American Literature',
+      '820':'English Literature',
+      '830':'German Literature',
+      '840':'French Literature',
+      '860':'Spanish Literature',
+      '880':'Greek Literature'
+    }
+  },
+  '900':{
+    name:'History, Geography & Biography',
+    color:'#8fa3b5',
+    subs:{
+      '910':'Geography & Travel',
+      '920':'Biography',
+      '930':'Ancient History',
+      '940':'European History',
+      '950':'Asian History',
+      '970':'North American History',
+      '980':'South American History'
+    }
+  },
+};
+
+function getDDCClass(dewey) {
+  const base = (dewey||'').split('.')[0];
+  const key  = String(Math.floor(parseInt(base)/100)*100).padStart(3,'0');
+  return DDC[key] || null;
+}
+
+// UI HELPERS
+function today() {
+  return new Date().toISOString().slice(0,10);
+}
+function fmt(d) {
+  return d ? d.replace(/-/g,'/') : '—';
+}
+
+let toastTimer = null;
+function showToast(msg, type='info') {
+  document.getElementById('toast-container').innerHTML =
+    `<div class="toast ${type}">${msg}</div>`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ document.getElementById('toast-container').innerHTML=''; }, 3500);
+}
+
+function showModal(html) {
+  document.getElementById('modal-container').innerHTML =
+    `<div class="modal-overlay" onclick="if(event.target===this)closeModal()">${html}</div>`;
+}
+
+function closeModal() {
+  document.getElementById('modal-container').innerHTML='';
+}
+
+function setContent(html) {
+  document.getElementById('content').innerHTML = html;
+}
+function loading() {
+  setContent('<div class="loading"><span class="spinner"></span>Loading...</div>');
+}
+
+const TITLES = {
+  dashboard:'Dashboard', books:'All Books', search:'Search Catalog',
+  'add-book':'Add Book', borrow:'Borrow a Book', return:'Return a Book',
+  records:'Borrow Records & Overdue Report', ddc:'Dewey Decimal Browser',
+  stats:'Statistics Dashboard'
+};
+
+function showView(view) {
+  document.querySelectorAll('.nav-item').forEach(el =>
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${view}'`))
+  );
+  document.getElementById('topbar-title').textContent = TITLES[view] || view;
+  loading();
+  switch(view) {
+    case 'dashboard': renderDashboard(); break;
+    case 'books':     renderBooks(); break;
+    case 'search':    renderSearch(); break;
+    case 'add-book':  renderAddBook(); break;
+    case 'borrow':    renderBorrow(); break;
+    case 'return':    renderReturn(); break;
+    case 'records':   renderRecords(); break;
+    case 'ddc':       renderDDC(); break;
+    case 'stats':     renderStats(); break;
+  }
+}
+
+// DASHBOARD
+async function renderDashboard() {
+  const [books, records] = await Promise.all([
+    api('get_books', {}, 'GET'),
+    api('get_records', {}, 'GET')
+  ]);
+  const total     = books.length;
+  const available = books.filter(b=>b.status==='available').length;
+  const borrowed  = books.filter(b=>b.status==='borrowed').length;
+  const overdue   = records.filter(r=>r.status==='overdue');
+  const recent    = [...books].slice(-5).reverse();
+  const recentRec = records.slice(0,4);
+
+  // Update overdue nav badge
+  const navRec = document.getElementById('nav-records');
+  const existing = navRec.querySelector('.nav-badge');
+  if (existing) existing.remove();
+  if (overdue.length > 0) {
+    navRec.insertAdjacentHTML('beforeend', `<span class="nav-badge">${overdue.length}</span>`);
+  }
+
+  setContent(`
+  <div class="card-grid">
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Total Books</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${available}</div><div class="stat-lbl">Available</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">${borrowed}</div><div class="stat-lbl">Borrowed</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${overdue.length}</div><div class="stat-lbl">Overdue</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${records.length}</div><div class="stat-lbl">Transactions</div></div>
+  </div>
+  ${overdue.length > 0 ? `
+  <div class="card" style="border-color:#4a3000">
+    <div class="card-title" style="color:var(--amber)">⚠ Overdue Books (${overdue.length})</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Patron</th><th>Book</th><th>Due Date</th><th>Days Late</th><th>Fine</th></tr></thead>
+      <tbody>${overdue.map(r=>`<tr class="overdue-row">
+        <td>${r.patron_name}</td><td class="td-title">${r.book_title}</td>
+        <td class="td-year">${fmt(r.due_date)}</td>
+        <td><span class="badge badge-overdue">${r.days_late} day${r.days_late!=1?'s':''}</span></td>
+        <td style="color:var(--amber);font-family:var(--mono)">₱${r.fee}.00</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>` : ''}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+    <div class="card">
+      <div class="card-title">Recent Books</div>
+      ${recent.map(b=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${b.title}</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${b.author} · DDC ${b.dewey}</div>
+          </div>
+          <span class="badge badge-${b.status}">${b.status}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Transactions</div>
+      ${recentRec.length === 0 ? '<div class="empty" style="padding:20px">No transactions yet</div>' :
+        recentRec.map(r=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">${r.patron_name}</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${r.book_title} · Due ${fmt(r.due_date)}</div>
+          </div>
+          <span class="badge badge-${r.status}">${r.status}</span>
+        </div>`).join('')}
+    </div>
+  </div>`);
+}
+
+// BOOKS
+async function renderBooks(filterStatus='all', sortBy='dewey') {
+  let books = await api('get_books', {sort: sortBy}, 'GET');
+  if (filterStatus !== 'all') books = books.filter(b=>b.status===filterStatus);
+  const total = books.length;
+  const av = books.filter(b=>b.status==='available').length;
+  const br = books.filter(b=>b.status==='borrowed').length;
+
+  setContent(`
+  <div class="search-bar">
+    <input type="text" id="books-search" placeholder="Filter by title or author..." oninput="filterBooksTable(this.value)" style="max-width:320px;"/>
+    <select onchange="renderBooks('${filterStatus}',this.value)" style="width:160px;">
+      <option value="dewey" ${sortBy==='dewey'?'selected':''}>Sort: DDC</option>
+      <option value="title" ${sortBy==='title'?'selected':''}>Sort: Title</option>
+      <option value="author" ${sortBy==='author'?'selected':''}>Sort: Author</option>
+      <option value="year" ${sortBy==='year'?'selected':''}>Sort: Year</option>
+      <option value="id" ${sortBy==='id'?'selected':''}>Sort: ID</option>
+    </select>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn ${filterStatus==='all'?'active':''}" onclick="renderBooks('all','${sortBy}')">All (${books.length + (filterStatus==='available'?br:filterStatus==='borrowed'?av:0)})</button>
+    <button class="filter-btn ${filterStatus==='available'?'active':''}" onclick="renderBooks('available','${sortBy}')">Available</button>
+    <button class="filter-btn ${filterStatus==='borrowed'?'active':''}" onclick="renderBooks('borrowed','${sortBy}')">Borrowed</button>
+  </div>
+  <div class="tbl-wrap">
+  <table id="books-table">
+    <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>DDC</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    ${books.map(b => {
+      const ddcCls = getDDCClass(b.dewey);
+      return `<tr data-search="${(b.title+' '+b.author).toLowerCase()}">
+        <td class="td-id">#${b.id}</td>
+        <td class="td-title">${b.title}</td>
+        <td style="color:var(--text2)">${b.author}</td>
+        <td><span class="td-ddc">${b.dewey}</span><br><span style="font-size:10px;color:var(--text3)">${ddcCls?ddcCls.name.slice(0,24):''}</span></td>
+        <td class="td-year">${b.year}</td>
+        <td><span class="badge badge-${b.status}">${b.status}</span></td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick='openEditBook(${JSON.stringify(b)})' style="margin-right:4px">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete(${b.id},'${b.title.replace(/'/g,"\\'")}','${b.status}')">Del</button>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table>
+  </div>
+  <div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text3)">
+    Showing ${total} book(s)
+  </div>`);
+}
+
+function filterBooksTable(val) {
+  document.querySelectorAll('#books-table tbody tr').forEach(tr => {
+    tr.style.display = (tr.dataset.search||'').includes(val.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ADD BOOK
+function renderAddBook() {
+  const curYr = new Date().getFullYear();
+  setContent(`
+  <div class="card" style="max-width:640px;">
+    <div class="card-title">+ Add New Book</div>
+    <div class="form-row full"><div class="form-group">
+      <label class="form-label">Book Title *</label>
+      <input class="form-input" id="ab-title" type="text" placeholder="Full title of the book"/>
+    </div></div>
+    <div class="form-row full"><div class="form-group">
+      <label class="form-label">Author(s) *</label>
+      <input class="form-input" id="ab-author" type="text" placeholder="Author name(s)"/>
+    </div></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Dewey Decimal (DDC) *</label>
+        <input class="form-input" id="ab-dewey" type="text" placeholder="e.g. 005.133"/>
+        <div class="form-hint">Format: 000–999 or 000.0000</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year Published *</label>
+        <input class="form-input" id="ab-year" type="number" min="1950" max="${curYr}" value="${curYr}"/>
+      </div>
+    </div>
+    <div class="card" style="padding:12px 16px;margin-top:4px;background:var(--bg3)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:8px">DDC QUICK REFERENCE</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;">
+        ${Object.entries(DDC).map(([k,v])=>`
+          <div style="font-size:11px;font-family:var(--mono)">
+            <span style="color:${v.color}">${k}</span>
+            <span style="color:var(--text3)"> — ${v.name.slice(0,28)}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="submitAddBook()">Add Book to Catalog</button>
+      <button class="btn btn-secondary" onclick="showView('books')">Cancel</button>
+    </div>
+  </div>`);
+}
+
+async function submitAddBook() {
+  const title  = document.getElementById('ab-title').value.trim();
+  const author = document.getElementById('ab-author').value.trim();
+  const dewey  = document.getElementById('ab-dewey').value.trim();
+  const year   = parseInt(document.getElementById('ab-year').value);
+  const curYr  = new Date().getFullYear();
+
+  if (!title||!author){
+    showToast('Title and Author are required','error');
+    return;
+  }
+  if (!/^\d{3}(\.\d{1,4})?$/.test(dewey)){
+    showToast('Invalid DDC format','error');
+    return;
+  }
+  if (isNaN(year)||year<1950||year>curYr){
+    showToast('Invalid year','error');
+    return;
+  }
+
+  await api('add_book', {title,author,dewey,year}, 'POST');
+  showToast(`"${title}" added to catalog!`, 'success');
+  showView('books');
+}
+
+// EDIT BOOK
+function openEditBook(b) {
+  const curYr = new Date().getFullYear();
+  showModal(`
+  <div class="modal">
+    <div class="modal-title">Edit Book #${b.id} <button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-row full"><div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="ed-title" type="text" value="${b.title.replace(/"/g,'&quot;')}"/>
+    </div></div>
+    <div class="form-row full"><div class="form-group">
+      <label class="form-label">Author</label>
+      <input class="form-input" id="ed-author" type="text" value="${b.author.replace(/"/g,'&quot;')}"/>
+    </div></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">DDC</label>
+        <input class="form-input" id="ed-dewey" type="text" value="${b.dewey}"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year</label>
+        <input class="form-input" id="ed-year" type="number" min="1950" max="${curYr}" value="${b.year}"/>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="submitEditBook(${b.id})">Save Changes</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>`);
+}
+
+async function submitEditBook(id) {
+  const title  = document.getElementById('ed-title').value.trim();
+  const author = document.getElementById('ed-author').value.trim();
+  const dewey  = document.getElementById('ed-dewey').value.trim();
+  const year   = parseInt(document.getElementById('ed-year').value);
+  const curYr  = new Date().getFullYear();
+  if (!title||!author){
+    showToast('Title and Author required','error');
+    return;
+  }
+  if (!/^\d{3}(\.\d{1,4})?$/.test(dewey)){
+    showToast('Invalid DDC format','error');
+    return;
+  }
+  if (isNaN(year)||year<1950||year>curYr){
+    showToast('Invalid year','error');
+    return;
+  }
+
+  await api('edit_book', {id,title,author,dewey,year}, 'POST');
+  closeModal();
+  showToast('Book updated!', 'success');
+  renderBooks();
+}
+
+// DELETE BOOK
+function confirmDelete(id, title, status) {
+  if (status==='borrowed'){ showToast('Cannot delete a currently borrowed book!','error'); return; }
+  showModal(`
+  <div class="modal">
+    <div class="modal-title" style="color:var(--red)">Delete Book <button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="confirm-box">
+      <div style="font-size:13px;margin-bottom:8px">Permanently delete:</div>
+      <div style="font-family:var(--mono);font-size:14px;color:var(--text)">"${title}"</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger" onclick="deleteBook(${id})">Yes, Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>`);
+}
+
+async function deleteBook(id) {
+  await api('delete_book', {id}, 'POST');
+  closeModal();
+  showToast('Book deleted','info');
+  renderBooks();
+}
+
+// ============================================================
+// BORROW
+// ============================================================
+async function renderBorrow() {
+  const books = await api('get_books', {}, 'GET');
+  const available = books.filter(b=>b.status==='available');
+  const todayStr = today();
+  const tomorrowStr = new Date(Date.now()+86400000).toISOString().slice(0,10);
+  const maxStr = new Date(Date.now()+21*86400000).toISOString().slice(0,10);
+
+  setContent(`
+  <div class="card" style="max-width:640px;">
+    <div class="card-title">↗ Borrow a Book</div>
+    ${available.length===0
+      ? '<div class="empty">No books currently available</div>'
+      : `<div class="form-row full"><div class="form-group">
+          <label class="form-label">Select Book *</label>
+          <select class="form-input" id="br-book" onchange="updateBorrowInfo(this.value,${JSON.stringify(books).replace(/"/g,'&quot;')})">
+            <option value="">— Choose an available book —</option>
+            ${available.map(b=>`<option value="${b.id}">#${b.id} — ${b.title} (${b.author})</option>`).join('')}
+          </select>
+        </div></div>
+        <div id="borrow-book-info" style="display:none;background:var(--bg3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;font-size:12px;font-family:var(--mono);color:var(--text2)"></div>
+        <div class="form-row full"><div class="form-group">
+          <label class="form-label">Patron Name *</label>
+          <input class="form-input" id="br-patron" type="text" placeholder="Full name of borrower"/>
+        </div></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Borrow Date</label>
+            <input class="form-input" type="date" value="${todayStr}" readonly style="opacity:.6"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date * (max 21 days)</label>
+            <input class="form-input" id="br-due" type="date" min="${tomorrowStr}" max="${maxStr}" value="${tomorrowStr}"/>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:4px">Overdue fee: ₱5.00/day · Max loan: 21 days</div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitBorrow()">Confirm Borrow</button>
+          <button class="btn btn-secondary" onclick="showView('books')">Cancel</button>
+        </div>`}
+  </div>`);
+}
+
+function updateBorrowInfo(id, books) {
+  const b = books.find(x=>x.id==id);
+  const el = document.getElementById('borrow-book-info');
+  if (!b){
+    el.style.display='none';
+    return;
+  }
+
+  const ddcCls = getDDCClass(b.dewey);
+  el.style.display='block';
+  el.innerHTML=`<span style="color:var(--teal)">${b.dewey}</span> — ${ddcCls?ddcCls.name:''} &nbsp;|&nbsp; ${b.year}`;
+}
+
+async function submitBorrow() {
+  const book_id    = parseInt(document.getElementById('br-book').value);
+  const patron_name = document.getElementById('br-patron').value.trim();
+  const due_date   = document.getElementById('br-due').value;
+  if (!book_id){
+    showToast('Please select a book','error');
+    return;
+  }
+  if (!patron_name){
+    showToast('Patron name is required','error');
+    return;
+  }
+  if (!due_date||due_date<=today()){
+    showToast('Due date must be after today','error');
+    return;
+  }
+
+  const res = await api('borrow_book', {book_id, patron_name, due_date}, 'POST');
+  showToast('Book borrowed successfully!', 'success');
+  showView('records');
+}
+
+// RETURN
+async function renderReturn() {
+  const books = await api('get_books', {}, 'GET');
+  const borrowed = books.filter(b=>b.status==='borrowed');
+
+  setContent(`
+  <div class="card" style="max-width:640px;">
+    <div class="card-title">↩ Return a Book</div>
+    ${borrowed.length===0
+      ? '<div class="empty">No books currently borrowed</div>'
+      : `<div class="form-row full"><div class="form-group">
+          <label class="form-label">Select Book to Return *</label>
+          <select class="form-input" id="ret-book" onchange="showReturnDetails(this.value)">
+            <option value="">— Choose a borrowed book —</option>
+            ${borrowed.map(b=>`<option value="${b.id}">#${b.id} — ${b.title}</option>`).join('')}
+          </select>
+        </div></div>
+        <div id="return-details"></div>
+        <div class="form-actions">
+          <button class="btn btn-success" onclick="submitReturn()">Confirm Return</button>
+          <button class="btn btn-secondary" onclick="showView('records')">Cancel</button>
+        </div>`}
+  </div>`);
+}
+
+async function showReturnDetails(id) {
+  if (!id){
+    document.getElementById('return-details').innerHTML='';
+    return;
+  }
+
+  const records = await api('get_records', {}, 'GET');
+  const rec = records.filter(r=>r.book_id==id&&r.status!=='returned').pop();
+  if (!rec){
+    document.getElementById('return-details').innerHTML='<div style="color:var(--red);font-size:12px">No active borrow record</div>';
+    return;
+  }
+
+  const late = rec.days_late || 0;
+  const fee  = late * 5;
+  document.getElementById('return-details').innerHTML=`
+  <div class="card" style="background:var(--bg3);margin-bottom:0">
+    <table style="width:100%;font-size:13px;font-family:var(--mono)">
+      <tr><td style="color:var(--text3);padding:5px 0;width:140px">Book</td><td style="color:var(--text)">${rec.book_title}</td></tr>
+      <tr><td style="color:var(--text3);padding:5px 0">Patron</td><td>${rec.patron_name}</td></tr>
+      <tr><td style="color:var(--text3);padding:5px 0">Borrowed</td><td>${fmt(rec.borrow_date)}</td></tr>
+      <tr><td style="color:var(--text3);padding:5px 0">Due Date</td><td>${fmt(rec.due_date)}</td></tr>
+      <tr><td style="color:var(--text3);padding:5px 0">Return Date</td><td style="color:var(--green)">${fmt(today())} (today)</td></tr>
+    </table>
+    ${late>0
+      ? `<div class="fee-box"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">OVERDUE FINE — ${late} day(s) late</div><div class="fee-amount">₱${fee}.00</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">₱5.00/day × ${late} days</div></div>`
+      : `<div style="color:var(--green);font-size:12px;font-family:var(--mono);margin-top:10px">✓ On time — no overdue fee</div>`}
+  </div>`;
+}
+
+async function submitReturn() {
+  const book_id = parseInt(document.getElementById('ret-book').value);
+  if (!book_id){
+    showToast('Please select a book','error');
+    return;
+  }
+
+  const res = await api('return_book', {book_id}, 'POST');
+  if (res.days_late > 0)
+    showToast(`Returned with ₱${res.fee}.00 overdue fine`, 'info');
+  else
+    showToast('Book returned — no fine!', 'success');
+  showView('records');
+}
+
+// BORROW RECORDS
+async function renderRecords() {
+  const records = await api('get_records', {}, 'GET');
+  const overdue = records.filter(r=>r.status==='overdue');
+  const totalFees = overdue.reduce((s,r)=>s+r.fee,0);
+
+  setContent(`
+  <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+    <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num">${records.length}</div><div class="stat-lbl">Total Records</div></div>
+    <div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num" style="color:var(--red)">${overdue.length}</div><div class="stat-lbl">Overdue</div></div>
+    ${totalFees>0?`<div class="stat-card" style="flex:1;min-width:120px"><div class="stat-num" style="color:var(--amber)">₱${totalFees}</div><div class="stat-lbl">Outstanding Fees</div></div>`:''}
+  </div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Book</th><th>DDC</th><th>Patron</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th><th>Fine</th></tr></thead>
+    <tbody>
+    ${records.map(r=>`<tr class="${r.status==='overdue'?'overdue-row':''}">
+      <td class="td-id">#${r.borrow_id}</td>
+      <td class="td-title">${r.book_title}</td>
+      <td class="td-ddc">${r.dewey}</td>
+      <td>${r.patron_name}</td>
+      <td class="td-year">${fmt(r.borrow_date)}</td>
+      <td class="td-year">${fmt(r.due_date)}</td>
+      <td class="td-year">${r.return_date?fmt(r.return_date):'—'}</td>
+      <td><span class="badge badge-${r.status}">${r.status}</span></td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--amber)">${r.fee>0?'₱'+r.fee+'.00':''}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>`);
+}
+
+// DDC BROWSER
+async function renderDDC(selectedClass=null) {
+  if (selectedClass) {
+    const c = DDC[selectedClass];
+    const books = await api('get_books', {}, 'GET');
+    const filtered = books.filter(b=>b.dewey.startsWith(selectedClass.charAt(0)));
+    setContent(`
+    <button class="btn btn-secondary btn-sm" onclick="renderDDC()" style="margin-bottom:16px">← Back to DDC Classes</button>
+    <div class="card">
+      <div class="card-title" style="color:${c.color}">DDC ${selectedClass} — ${c.name}</div>
+      ${Object.entries(c.subs).map(([k,v])=>`
+        <div class="ddc-sub-row"><span class="ddc-sub-code">${k}</span><span class="ddc-sub-name">${v}</span></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">Books in DDC ${selectedClass}.xxx</div>
+      ${filtered.length===0
+        ? '<div class="empty">No books in this class yet</div>'
+        : `<div class="tbl-wrap"><table>
+            <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>DDC</th><th>Year</th><th>Status</th></tr></thead>
+            <tbody>${filtered.map(b=>`<tr>
+              <td class="td-id">#${b.id}</td><td class="td-title">${b.title}</td>
+              <td>${b.author}</td><td class="td-ddc">${b.dewey}</td>
+              <td class="td-year">${b.year}</td>
+              <td><span class="badge badge-${b.status}">${b.status}</span></td>
+            </tr>`).join('')}</tbody>
+           </table></div>`}
+    </div>`);
+    return;
+  }
+
+  const books = await api('get_books', {}, 'GET');
+  setContent(`<div class="ddc-grid">
+    ${Object.entries(DDC).map(([k,v])=>{
+      const cnt = books.filter(b=>b.dewey.startsWith(k.charAt(0))).length;
+      return `<div class="ddc-card" onclick="renderDDC('${k}')">
+        <div class="ddc-code" style="color:${v.color}">${k}</div>
+        <div class="ddc-name">${v.name}</div>
+        <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text3)">${cnt} book(s)</div>
+      </div>`;
+    }).join('')}
+  </div>`);
+}
+
+// SEARCH
+function renderSearch() {
+  setContent(`
+  <div class="card">
+    <div class="card-title">Search Catalog</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <select id="search-mode" style="width:160px;">
+        <option value="title">By Title</option>
+        <option value="author">By Author</option>
+        <option value="dewey">By DDC Number</option>
+      </select>
+      <input type="text" id="search-q" placeholder="Enter search term..." style="flex:1;min-width:200px;" onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="btn btn-primary" onclick="doSearch()">Search</button>
+    </div>
+  </div>
+  <div id="search-results"></div>`);
+}
+
+async function doSearch() {
+  const mode = document.getElementById('search-mode').value;
+  const q    = document.getElementById('search-q').value.trim();
+  if (!q){
+    showToast('Enter a search term','error');
+    return;
+  }
+
+  const books = await api('get_books', {}, 'GET');
+  let results;
+  if (mode==='title')
+    results = books.filter(b=>b.title.toLowerCase().includes(q.toLowerCase()));
+  else if (mode==='author') 
+    results = books.filter(b=>b.author.toLowerCase().includes(q.toLowerCase()));
+  else 
+    results = books.filter(b=>b.dewey.startsWith(q));
+
+  document.getElementById('search-results').innerHTML = results.length===0
+    ? `<div class="empty"><div style="font-size:32px;margin-bottom:8px">◌</div>No books found for "${q}"</div>`
+    : `<div class="tbl-wrap"><table>
+        <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>DDC</th><th>Year</th><th>Status</th></tr></thead>
+        <tbody>${results.map(b=>`<tr>
+          <td class="td-id">#${b.id}</td><td class="td-title">${b.title}</td>
+          <td>${b.author}</td><td class="td-ddc">${b.dewey}</td>
+          <td class="td-year">${b.year}</td>
+          <td><span class="badge badge-${b.status}">${b.status}</span></td>
+        </tr>`).join('')}</tbody>
+       </table></div>
+       <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--text3)">${results.length} result(s)</div>`;
+}
+
+// STATISTICS
+async function renderStats() {
+  const [stats, books] = await Promise.all([
+    api('get_stats', {}, 'GET'),
+    api('get_books',  {}, 'GET')
+  ]);
+  const avPct = stats.total>0?Math.round(stats.available/stats.total*100):0;
+  const bPct  = stats.total>0?Math.round(stats.borrowed/stats.total*100):0;
+  const ddcEntries = Object.entries(DDC).map(([k,v])=>({
+    k,v,cnt:stats.ddc_counts[k]||0
+  })).filter(x=>x.cnt>0);
+  const maxCnt = Math.max(...ddcEntries.map(x=>x.cnt), 1);
+
+  setContent(`
+  <div class="card-grid">
+    <div class="stat-card"><div class="stat-num">${stats.total}</div><div class="stat-lbl">Total Books</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${stats.available} (${avPct}%)</div><div class="stat-lbl">Available</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">${stats.borrowed} (${bPct}%)</div><div class="stat-lbl">Borrowed</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${stats.overdue}</div><div class="stat-lbl">Overdue</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${stats.txns}</div><div class="stat-lbl">Transactions</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Books by DDC Class</div>
+    ${ddcEntries.length===0
+      ? '<div class="empty">No books in catalog yet</div>'
+      : ddcEntries.map(({k,v,cnt})=>`
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+            <span style="font-family:var(--mono);font-size:12px">
+              <span style="color:${v.color}">${k}</span>
+              <span style="color:var(--text2)"> ${v.name.slice(0,40)}</span>
+            </span>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--amber)">${cnt}</span>
+          </div>
+          <div class="stats-bar">
+            <div class="stats-fill" style="width:${Math.round(cnt/maxCnt*100)}%;background:${v.color}"></div>
+          </div>
+        </div>`).join('')}
+  </div>`);
+}
+
+// START
+showView('dashboard');
+</script>
+</body>
+</html>
